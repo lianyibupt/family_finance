@@ -195,36 +195,17 @@ def income_statement():
         if category in category_data:
             category_data[category]['surplus'] = category_data[category]['income'] - category_data[category]['expense']
     
-    # 生成收入支出对比柱状图
+    # 生成收入支出对比柱状图数据
     categories_list = sorted(list(categories))
     income_values = [category_data[cat]['income'] for cat in categories_list]
     expense_values = [category_data[cat]['expense'] for cat in categories_list]
     
-    # 设置中文字体
-    plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'SimHei']
-    plt.rcParams['axes.unicode_minus'] = False
-    
-    fig, ax = plt.subplots(figsize=(10, 6))
-    bar_width = 0.35
-    index = range(len(categories_list))
-    
-    ax.bar(index, income_values, bar_width, label='收入', color='#10B981')
-    ax.bar([i + bar_width for i in index], expense_values, bar_width, label='支出', color='#EF4444')
-    
-    ax.set_xlabel('类别')
-    ax.set_ylabel('金额(元)')
-    ax.set_title(f'{year}年收入支出对比')
-    ax.set_xticks([i + bar_width / 2 for i in index])
-    ax.set_xticklabels(categories_list, rotation=45)
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    
-    # 保存图表到临时文件
-    chart_filename = f'income_statement_chart_{year}.png'
-    chart_path = os.path.join(current_app.static_folder, 'charts', chart_filename)
-    os.makedirs(os.path.dirname(chart_path), exist_ok=True)
-    plt.savefig(chart_path, bbox_inches='tight', dpi=300)
-    plt.close()
+    # 准备Chart.js所需数据
+    chart_data = {
+        'categories': categories_list,
+        'income_values': income_values,
+        'expense_values': expense_values
+    }
     
     return render_template('income_statement.html',
                            year=year,
@@ -233,7 +214,7 @@ def income_statement():
                            net_surplus=net_surplus,
                            categories=categories_list,
                            category_data=category_data,
-                           chart_filename=chart_filename)
+                           chart_data=chart_data)
 
 @main.route('/balance_sheet', methods=['GET'])
 def balance_sheet():
@@ -265,7 +246,7 @@ def balance_sheet():
     total_liabilities = sum(liability.amount for liability in liabilities)
     net_worth = total_assets - total_liabilities
     
-    # 生成资产负债对比柱状图
+    # 生成资产负债对比柱状图数据
     # 按类型分组资产和负债
     asset_types = {}  # type: amount
     liability_types = {}  # type: amount
@@ -280,10 +261,6 @@ def balance_sheet():
             liability_types[liability.type] = 0
         liability_types[liability.type] += liability.amount
     
-    # 设置中文字体
-    plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'SimHei']
-    plt.rcParams['axes.unicode_minus'] = False
-    
     # 准备图表数据
     all_types = list(set(list(asset_types.keys()) + list(liability_types.keys())))
     all_types.sort()
@@ -291,27 +268,12 @@ def balance_sheet():
     asset_values = [asset_types.get(atype, 0) for atype in all_types]
     liability_values = [liability_types.get(atype, 0) for atype in all_types]
     
-    fig, ax = plt.subplots(figsize=(10, 6))
-    bar_width = 0.35
-    index = range(len(all_types))
-    
-    ax.bar(index, asset_values, bar_width, label='资产', color='#10B981')
-    ax.bar([i + bar_width for i in index], liability_values, bar_width, label='负债', color='#EF4444')
-    
-    ax.set_xlabel('类别')
-    ax.set_ylabel('金额(元)')
-    ax.set_title(f'{year}年资产负债对比')
-    ax.set_xticks([i + bar_width / 2 for i in index])
-    ax.set_xticklabels(all_types, rotation=45)
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    
-    # 保存图表到临时文件
-    chart_filename = f'balance_sheet_chart_{year}.png'
-    chart_path = os.path.join(current_app.static_folder, 'charts', chart_filename)
-    os.makedirs(os.path.dirname(chart_path), exist_ok=True)
-    plt.savefig(chart_path, bbox_inches='tight', dpi=300)
-    plt.close()
+    # 准备Chart.js所需数据
+    chart_data = {
+        'categories': all_types,
+        'asset_values': asset_values,
+        'liability_values': liability_values
+    }
     
     return render_template('balance_sheet.html',
                            year=year,
@@ -320,7 +282,7 @@ def balance_sheet():
                            total_assets=total_assets,
                            total_liabilities=total_liabilities,
                            net_worth=net_worth,
-                           chart_filename=chart_filename)
+                           chart_data=chart_data)
 
 @main.route('/cash_flow', methods=['GET'])
 def cash_flow():
@@ -374,7 +336,7 @@ def cash_flow():
     operating_outflow = sum(item['amount'] for item in cash_flow_items if item['type'] == 'expense')
     net_operating_flow = operating_inflow - operating_outflow
     
-    # 生成现金流量对比柱状图
+    # 生成现金流量对比柱状图数据
     # 按类别分组现金流入和流出
     inflow_by_category = {}  # category: amount
     outflow_by_category = {}  # category: amount
@@ -389,10 +351,6 @@ def cash_flow():
                 outflow_by_category[item['category']] = 0
             outflow_by_category[item['category']] += item['amount']
     
-    # 设置中文字体
-    plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'SimHei']
-    plt.rcParams['axes.unicode_minus'] = False
-    
     # 准备图表数据
     all_categories = list(set(list(inflow_by_category.keys()) + list(outflow_by_category.keys())))
     all_categories.sort()
@@ -400,27 +358,12 @@ def cash_flow():
     inflow_values = [inflow_by_category.get(cat, 0) for cat in all_categories]
     outflow_values = [outflow_by_category.get(cat, 0) for cat in all_categories]
     
-    fig, ax = plt.subplots(figsize=(10, 6))
-    bar_width = 0.35
-    index = range(len(all_categories))
-    
-    ax.bar(index, inflow_values, bar_width, label='现金流入', color='#10B981')
-    ax.bar([i + bar_width for i in index], outflow_values, bar_width, label='现金流出', color='#EF4444')
-    
-    ax.set_xlabel('类别')
-    ax.set_ylabel('金额(元)')
-    ax.set_title(f'{year}年现金流量对比')
-    ax.set_xticks([i + bar_width / 2 for i in index])
-    ax.set_xticklabels(all_categories, rotation=45)
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    
-    # 保存图表到临时文件
-    chart_filename = f'cash_flow_chart_{year}.png'
-    chart_path = os.path.join(current_app.static_folder, 'charts', chart_filename)
-    os.makedirs(os.path.dirname(chart_path), exist_ok=True)
-    plt.savefig(chart_path, bbox_inches='tight', dpi=300)
-    plt.close()
+    # 准备Chart.js所需数据
+    chart_data = {
+        'categories': all_categories,
+        'inflow_values': inflow_values,
+        'outflow_values': outflow_values
+    }
     
     return render_template('cash_flow.html',
                            year=year,
@@ -428,7 +371,7 @@ def cash_flow():
                            operating_inflow=operating_inflow,
                            operating_outflow=operating_outflow,
                            net_operating_flow=net_operating_flow,
-                           chart_filename=chart_filename)
+                           chart_data=chart_data)
 
 @main.route('/import/image', methods=['GET', 'POST'])
 def import_image():
@@ -1032,9 +975,6 @@ def dashboard():
 def comparison_chart():
     """生成收入支出结余对比图表"""
     import pandas as pd
-    import matplotlib
-    matplotlib.use('Agg')  # 非GUI后端
-    import matplotlib.pyplot as plt
     import os
     
     # 获取所有年份的数据
@@ -1063,42 +1003,12 @@ def comparison_chart():
     expenses = merged_df['amount_expense'].tolist()
     surpluses = merged_df['surplus'].tolist()
     
-    # 设置中文字体
-    plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'SimHei']
-    plt.rcParams['axes.unicode_minus'] = False
+    # 准备Chart.js所需数据
+    chart_data = {
+        'years': years,
+        'incomes': incomes,
+        'expenses': expenses,
+        'surpluses': surpluses
+    }
     
-    fig, ax = plt.subplots(figsize=(10, 6))
-    
-    # 绘制收入和支出 - 使用新的色彩方案
-    ax.bar(years, incomes, width=0.3, label='收入', color='#007bff')  # 柔和海洋蓝
-    ax.bar(years, [-expense for expense in expenses], width=0.3, label='支出', color='#ff6b6b')  # 珊瑚红
-    
-    # 绘制结余折线 - 使用绿色
-    ax.plot(years, surpluses, label='结余', color='#28a745', marker='o', linewidth=2)
-    
-    ax.set_xlabel('年份')
-    ax.set_ylabel('金额(元)')
-    ax.set_title('收入支出结余对比')
-    ax.legend()
-    
-    # 在柱子上显示数值
-    # 在柱子上显示数值
-    for i, year in enumerate(years):
-        income = incomes[i]
-        expense = expenses[i]
-        surplus = surpluses[i]
-        
-        ax.text(i, income + income * 0.01, f'{income:,.0f}', ha='center', va='bottom', color='#007bff', fontsize=9)  # 海洋蓝
-        ax.text(i, -expense - expense * 0.01, f'{expense:,.0f}', ha='center', va='top', color='#ff6b6b', fontsize=9)  # 珊瑚红
-        ax.text(i, surplus + surplus * 0.02, f'{surplus:,.0f}', ha='center', va='bottom' if surplus >= 0 else 'top', color='#28a745', fontsize=9)  # 绿色
-    
-    plt.tight_layout()
-    
-    # 保存图表到静态文件夹
-    chart_path = os.path.join(current_app.root_path, 'static', 'charts', 'income_expense_surplus.png')
-    plt.savefig(chart_path, dpi=300)
-    plt.close()
-    
-    # 返回图表URL
-    chart_url = url_for('static', filename='charts/income_expense_surplus.png')
-    return render_template('comparison_chart.html', chart_url=chart_url, years=years, incomes=incomes, expenses=expenses, surpluses=surpluses)
+    return render_template('comparison_chart.html', chart_data=chart_data, years=years, incomes=incomes, expenses=expenses, surpluses=surpluses)

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="bg-base-100 rounded-lg shadow-lg p-6">
+    <div class="bg-base-100 rounded-lg shadow-lg p-6" style="width: 100%; margin: 0 auto;">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">资产负债表</h2>
         
-        <form method="GET" action="{{ url_for('main.balance_sheet') }}" class="flex gap-2 mb-6">
+        <form method="GET" action="{{ url_for('main.balance_sheet') }}" class="flex gap-4 mb-6">
             <div class="form-control">
                 <label for="year" class="label">年份：</label>
                 <input 
@@ -35,10 +35,146 @@
         
         <div class="space-y-6">
             <!-- 显示资产负债对比柱状图 -->
-            {% if chart_filename %}
-            <div class="overflow-x-auto">
-                <img src="{{ url_for('static', filename='charts/' + chart_filename) }}" alt="资产负债对比图表" style="max-width: 100%; height: auto;">
+            {% if chart_data %}
+            <div class="chart-wrapper">
+                <div class="chart-container">
+                    <canvas id="balanceSheetChart"></canvas>
+                </div>
+                <div class="chart-title">
+                    {{ year }}年资产负债对比
+                </div>
             </div>
+            
+            <!-- 引入Chart.js -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+            <script>
+                // Wait for the DOM to be fully loaded before initializing the chart
+                document.addEventListener('DOMContentLoaded', function() {
+                    const ctx = document.getElementById('balanceSheetChart').getContext('2d');
+                    const chartData = {{ chart_data | tojson | safe }};
+                    
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: chartData.categories,
+                            datasets: [
+                                {
+                                    label: '资产',
+                                    data: chartData.asset_values,
+                                    backgroundColor: 'rgba(72, 187, 120, 0.8)',
+                                    borderColor: 'rgba(72, 187, 120, 1)',
+                                    borderWidth: 2,
+                                    borderRadius: 12,
+                                    borderSkipped: false,
+                                    hoverBackgroundColor: 'rgba(72, 187, 120, 1)',
+                                    hoverBorderColor: 'rgba(72, 187, 120, 1)',
+                                    hoverBorderWidth: 3,
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowOffsetY: 4,
+                                    shadowColor: 'rgba(72, 187, 120, 0.3)'
+                                },
+                                {
+                                    label: '负债',
+                                    data: chartData.liability_values,
+                                    backgroundColor: 'rgba(245, 101, 101, 0.8)',
+                                    borderColor: 'rgba(245, 101, 101, 1)',
+                                    borderWidth: 2,
+                                    borderRadius: 12,
+                                    borderSkipped: false,
+                                    hoverBackgroundColor: 'rgba(245, 101, 101, 1)',
+                                    hoverBorderColor: 'rgba(245, 101, 101, 1)',
+                                    hoverBorderWidth: 3,
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowOffsetY: 4,
+                                    shadowColor: 'rgba(245, 101, 101, 0.3)'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 20,
+                                        font: {
+                                            size: 14,
+                                            weight: 'bold'
+                                        },
+                                        color: '#374151'
+                                    },
+                                    onHover: function(event, legendItem) {
+                                        event.native.target.style.cursor = 'pointer';
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                    titleColor: '#1f2937',
+                                    bodyColor: '#4b5563',
+                                    borderColor: '#e5e7eb',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    borderRadius: 12,
+                                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.dataset.label || '';
+                                            const value = context.parsed.y || 0;
+                                            return `${label}: ¥${value.toFixed(2)}`;
+                                        }
+                                    }
+                                },
+                                animation: {
+                                    animateScale: true,
+                                    animateRotate: false,
+                                    duration: 800,
+                                    easing: 'easeOutExpo'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)',
+                                        drawBorder: false
+                                    },
+                                    ticks: {
+                                        color: '#6b7280',
+                                        font: {
+                                            size: 12
+                                        },
+                                        callback: function(value, index, ticks) {
+                                            return '¥' + value;
+                                        }
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false,
+                                        drawBorder: false
+                                    },
+                                    ticks: {
+                                        color: '#6b7280',
+                                        font: {
+                                            size: 12,
+                                            weight: 'bold'
+                                        },
+                                        maxRotation: 45,
+                                        minRotation: 45
+                                    }
+                                }
+                            },
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        }
+                    });
+                });
+            </script>
             {% endif %}
             
             <div class="text-center">

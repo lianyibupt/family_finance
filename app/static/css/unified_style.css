@@ -18,6 +18,8 @@ body {
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
+    width: 100%;
+    margin: 0 auto;
 }
 
 .unified-card:hover {
@@ -247,10 +249,16 @@ body {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 24px;
+    box-sizing: border-box;
 }
 
 .chart-container {
-    height: 400px;
+    width: 100% !important;
+    height: 500px !important;
+    box-sizing: border-box;
 }
 
 .chart-title {
@@ -395,10 +403,11 @@ body {
 /* 主容器样式 */
 .main-container {
     display: flex;
-    gap: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem;
+    gap: 1rem;
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .content-area {
@@ -909,7 +918,6 @@ body {
     font-size: 0.8rem;
     color: #718096;
     white-space: nowrap;
-}
 }
 
 .progress-text {

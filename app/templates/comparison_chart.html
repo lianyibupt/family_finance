@@ -1,17 +1,168 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="bg-base-100 rounded-lg shadow-lg p-6">
+    <div class="bg-base-100 rounded-lg shadow-lg p-6" style="width: 100%; margin: 0 auto;">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">收入支出结余对比</h2>
         
         {% if years and years|length > 0 %}
-            <div class="chart-container mb-8">
-                <img 
-                    src="{{ chart_url }}" 
-                    alt="收入支出结余对比图表"
-                    class="rounded-lg shadow-xl"
-                >
+            <div class="chart-wrapper">
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+                <div class="chart-title">
+                    收入支出结余对比
+                </div>
             </div>
+            
+            <!-- 引入Chart.js -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+            <script>
+                // Wait for the DOM to be fully loaded before initializing the chart
+                document.addEventListener('DOMContentLoaded', function() {
+                    const ctx = document.getElementById('comparisonChart').getContext('2d');
+                    const chartData = {{ chart_data | tojson | safe }};
+                    
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: chartData.years,
+                            datasets: [
+                                {
+                                    label: '收入',
+                                    data: chartData.incomes,
+                                    backgroundColor: 'rgba(72, 187, 120, 0.8)',
+                                    borderColor: 'rgba(72, 187, 120, 1)',
+                                    borderWidth: 2,
+                                    borderRadius: 12,
+                                    borderSkipped: false,
+                                    hoverBackgroundColor: 'rgba(72, 187, 120, 1)',
+                                    hoverBorderColor: 'rgba(72, 187, 120, 1)',
+                                    hoverBorderWidth: 3,
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowOffsetY: 4,
+                                    shadowColor: 'rgba(72, 187, 120, 0.3)'
+                                },
+                                {
+                                    label: '支出',
+                                    data: chartData.expenses,
+                                    backgroundColor: 'rgba(245, 101, 101, 0.8)',
+                                    borderColor: 'rgba(245, 101, 101, 1)',
+                                    borderWidth: 2,
+                                    borderRadius: 12,
+                                    borderSkipped: false,
+                                    hoverBackgroundColor: 'rgba(245, 101, 101, 1)',
+                                    hoverBorderColor: 'rgba(245, 101, 101, 1)',
+                                    hoverBorderWidth: 3,
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowOffsetY: 4,
+                                    shadowColor: 'rgba(245, 101, 101, 0.3)'
+                                },
+                                {
+                                    label: '结余',
+                                    data: chartData.surpluses,
+                                    type: 'line',
+                                    backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                                    borderColor: 'rgba(99, 102, 241, 1)',
+                                    borderWidth: 2,
+                                    fill: false,
+                                    tension: 0.3,
+                                    markerRadius: 6,
+                                    markerBackgroundColor: 'rgba(99, 102, 241, 1)',
+                                    markerBorderColor: '#fff',
+                                    markerBorderWidth: 2,
+                                    hoverBackgroundColor: 'rgba(99, 102, 241, 1)',
+                                    hoverBorderColor: 'rgba(99, 102, 241, 1)',
+                                    hoverBorderWidth: 3,
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowOffsetY: 4,
+                                    shadowColor: 'rgba(99, 102, 241, 0.3)'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 20,
+                                        font: {
+                                            size: 14,
+                                            weight: 'bold'
+                                        },
+                                        color: '#374151'
+                                    },
+                                    onHover: function(event, legendItem) {
+                                        event.native.target.style.cursor = 'pointer';
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                    titleColor: '#1f2937',
+                                    bodyColor: '#4b5563',
+                                    borderColor: '#e5e7eb',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    borderRadius: 12,
+                                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.dataset.label || '';
+                                            const value = context.parsed.y || 0;
+                                            return `${label}: ¥${value.toFixed(2)}`;
+                                        }
+                                    }
+                                },
+                                animation: {
+                                    animateScale: true,
+                                    animateRotate: false,
+                                    duration: 800,
+                                    easing: 'easeOutExpo'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)',
+                                        drawBorder: false
+                                    },
+                                    ticks: {
+                                        color: '#6b7280',
+                                        font: {
+                                            size: 12
+                                        },
+                                        callback: function(value, index, ticks) {
+                                            return '¥' + value;
+                                        }
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false,
+                                        drawBorder: false
+                                    },
+                                    ticks: {
+                                        color: '#6b7280',
+                                        font: {
+                                            size: 12,
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            },
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        }
+                    });
+                });
+            </script>
             
             <h3 class="text-xl font-semibold mb-4">详细数据</h3>
             <div class="overflow-x-auto">
