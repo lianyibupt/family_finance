@@ -1,19 +1,19 @@
 # 本地OCR功能使用说明
 
 ## 概述
-本系统集成了本地LMstudio运行的DeepSeek-OCR服务，支持银行账单图像的自动识别与导入。
+本系统集成了本地LMstudio运行的qwen/qwen3-vl-4b服务，支持银行账单图像的自动识别与导入。
 
 ## 前置条件
 1. **安装LMstudio**：从[LMstudio官网](https://lmstudio.ai/)下载并安装
-2. **下载OCR模型**：在LMstudio中搜索并下载 `deepseek-ai/DeepSeek-OCR-V2-Instruct-GGUF` 模型
+2. **下载OCR模型**：在LMstudio中搜索并下载 `qwen/qwen3-vl-4b` 模型
 3. **启动OCR服务**：
    - 选择下载好的模型
-   - 设置模型名称为 `deepseek-ocr`
+   - 设置模型名称为 `qwen/qwen3-vl-4b`
    - 点击「Start Server」，默认端口：`http://localhost:1234`
 
 ## 服务配置
 ### LMstudio服务配置
-- **模型名称**：deepseek-ocr
+- **模型名称**：qwen/qwen3-vl-4b
 - **端口**：1234
 - **上下文长度**：建议设置为8192
 
@@ -43,7 +43,7 @@ python run.py
 curl http://localhost:1234/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "deepseek-ocr",
+    "model": "qwen/qwen3-vl-4b",
     "messages": [
         {
             "role": "system",
@@ -85,7 +85,7 @@ ocr_client = LocalDeepSeekOCR(api_url="http://localhost:1234/v1/chat/completions
    - 调整模型的上下文长度
 
 3. **JSON解析错误**：
-   - 检查DeepSeek-OCR的输出格式
+   - 检查qwen/qwen3-vl-4b的输出格式
    - 调整提示词要求严格的JSON格式
 
 ### 调试方法
