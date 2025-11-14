@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="bg-base-100 rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">资产负债表</h2>
+        
+        <form method="GET" action="{{ url_for('main.balance_sheet') }}" class="flex gap-2 mb-6">
+            <div class="form-control">
+                <label for="year" class="label">年份：</label>
+                <input 
+                    type="number" 
+                    id="year" 
+                    name="year" 
+                    value="{{ year }}" 
+                    placeholder="2023"
+                    class="input input-bordered"
+                >
+            </div>
+            <div class="form-control">
+                <label for="period_type" class="label">期间类型：</label>
+                <select 
+                    id="period_type" 
+                    name="period_type" 
+                    class="select select-bordered"
+                >
+                    <option value="all" {% if period_type == 'all' or period_type is undefined %}selected{% endif %}>全部</option>
+                    <option value="monthly" {% if period_type == 'monthly' %}selected{% endif %}>月度</option>
+                    <option value="annual" {% if period_type == 'annual' %}selected{% endif %}>年度</option>
+                </select>
+            </div>
+            <div class="form-control self-end">
+                <button type="submit" class="btn btn-primary">查询</button>
+            </div>
+        </form>
+        
+        <div class="space-y-6">
+            <!-- 显示资产负债对比柱状图 -->
+            {% if chart_filename %}
+            <div class="overflow-x-auto">
+                <img src="{{ url_for('static', filename='charts/' + chart_filename) }}" alt="资产负债对比图表" style="max-width: 100%; height: auto;">
+            </div>
+            {% endif %}
+            
+            <div class="text-center">
+                <h3 class="text-lg font-semibold text-success">
+                    {{ year }}年 总资产：¥{{ total_assets | round(2) }}
+                </h3>
+                <h3 class="text-lg font-semibold text-error">
+                    {{ year }}年 总负债：¥{{ total_liabilities | round(2) }}
+                </h3>
+                <h3 class="text-lg font-semibold text-primary">
+                    {{ year }}年 净资产：¥{{ net_worth | round(2) }}
+                </h3>
+            </div>
+            
+            <div class="grid gap-4">
+                <div>
+                    <h4 class="text-xl font-semibold mb-3">资产</h4>
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra">
+                            <thead>
+                                <tr>
+                                    <th>类型</th>
+                                    <th>名称</th>
+                                    <th>金额(元)</th>
+                                    <th>所有者</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for asset in assets %}
+                                <tr>
+                                    <td>{{ asset.type }}</td>
+                                    <td>{{ asset.name }}</td>
+                                    <td class="text-right">¥{{ asset.amount | round(2) }}</td>
+                                    <td>{{ asset.owner }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="bg-base-200 font-bold">
+                                    <td colspan="2">合计</td>
+                                    <td class="text-right">¥{{ total_assets | round(2) }}</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-xl font-semibold mb-3">负债</h4>
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra">
+                            <thead>
+                                <tr>
+                                    <th>类型</th>
+                                    <th>名称</th>
+                                    <th>金额(元)</th>
+                                    <th>所有者</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for liability in liabilities %}
+                                <tr>
+                                    <td>{{ liability.type }}</td>
+                                    <td>{{ liability.name }}</td>
+                                    <td class="text-right">¥{{ liability.amount | round(2) }}</td>
+                                    <td>{{ liability.owner }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="bg-base-200 font-bold">
+                                    <td colspan="2">合计</td>
+                                    <td class="text-right">¥{{ total_liabilities | round(2) }}</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

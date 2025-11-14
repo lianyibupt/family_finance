@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="bg-base-100 rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">财务健康分析</h2>
+        
+        <form method="GET" action="{{ url_for('main.financial_health') }}" class="flex gap-2 mb-6">
+            <div class="form-control">
+                <label for="year" class="label">年份：</label>
+                <input 
+                    type="number" 
+                    id="year" 
+                    name="year" 
+                    value="{{ year }}" 
+                    placeholder="2023"
+                    class="input input-bordered"
+                >
+            </div>
+            <div class="form-control self-end">
+                <button type="submit" class="btn btn-primary">分析</button>
+            </div>
+        </form>
+        
+        <div class="mb-6">
+            <a href="{{ url_for('main.comparison_chart') }}" class="btn btn-secondary">
+                📊 查看收入支出对比图表
+            </a>
+        </div>
+        
+        <div class="score-container text-center my-10">
+            <div class="health-score text-5xl font-bold text-primary">
+                {{ health_score }}
+            </div>
+            <div class="score-description text-xl font-semibold text-gray-600">
+                {{ health_level }}
+            </div>
+        </div>
+        
+        <div class="space-y-4">
+            <div class="card bg-base-200 shadow-lg">
+                <div class="card-body">
+                    <div class="card-title">结余率</div>
+                    <div class="metric-value text-3xl font-bold mb-2 {{ 'text-success' if metrics.surplus_rate >= 0.3 else 'text-warning' if metrics.surplus_rate >= 0.1 else 'text-error' }}">
+                        {{ (metrics.surplus_rate * 100) | round(1) }}%
+                    </div>
+                    <div class="text-gray-600 mb-1">计算公式：(总收入 - 总支出) / 总收入 × 100%</div>
+                    <div class="text-gray-600 mb-1">理想范围：30%以上为优秀，10-30%为良好，10%以下为需要改善</div>
+                    <div class="text-primary italic">
+                        建议：{{ '保持良好的储蓄习惯！' if metrics.surplus_rate >= 0.3 else '可以适当减少不必要的支出' }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-base-200 shadow-lg">
+                <div class="card-body">
+                    <div class="card-title">偿债率</div>
+                    <div class="metric-value text-3xl font-bold mb-2 {{ 'text-success' if metrics.debt_rate < 0.5 else 'text-warning' if metrics.debt_rate < 0.7 else 'text-error' }}">
+                        {{ (metrics.debt_rate * 100) | round(1) }}%
+                    </div>
+                    <div class="text-gray-600 mb-1">计算公式：总负债 / 总资产 × 100%</div>
+                    <div class="text-gray-600 mb-1">理想范围：50%以下为安全，50-70%为警告，70%以上为危险</div>
+                    <div class="text-primary italic">
+                        建议：{{ '负债水平合理' if metrics.debt_rate < 0.5 else '需要控制负债规模' }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-base-200 shadow-lg">
+                <div class="card-body">
+                    <div class="card-title">净资产增长率</div>
+                    <div class="metric-value text-3xl font-bold mb-2 {{ 'text-success' if metrics.net_worth_growth >= 0.1 else 'text-warning' }}">
+                        {{ (metrics.net_worth_growth * 100) | round(1) }}%
+                    </div>
+                    <div class="text-gray-600 mb-1">计算公式：(当年净资产 - 上年净资产) / 上年净资产 × 100%</div>
+                    <div class="text-gray-600 mb-1">理想范围：10%以上为优秀</div>
+                    <div class="text-primary italic">
+                        建议：{{ '资产增值良好' if metrics.net_worth_growth >= 0.1 else '可以考虑优化投资组合' }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-base-200 shadow-lg">
+                <div class="card-body">
+                    <div class="card-title">现金流比率</div>
+                    <div class="metric-value text-3xl font-bold mb-2 {{ 'text-success' if metrics.cash_flow_ratio >= 0.5 else 'text-warning' }}">
+                        {{ (metrics.cash_flow_ratio * 100) | round(1) }}%
+                    </div>
+                    <div class="text-gray-600 mb-1">计算公式：经营活动现金净流量 / 总负债 × 100%</div>
+                    <div class="text-gray-600 mb-1">理想范围：50%以上为安全</div>
+                    <div class="text-primary italic">
+                        建议：{{ '现金流状况良好' if metrics.cash_flow_ratio >= 0.5 else '需要增加现金流储备' }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-base-200 shadow-lg">
+                <div class="card-body">
+                    <div class="card-title">净资产收益率 (ROE)</div>
+                    <div class="metric-value text-3xl font-bold mb-2 {{ 'text-success' if metrics.roe >= 15 else 'text-warning' if metrics.roe >= 5 else 'text-error' }}">
+                        {{ metrics.roe | round(1) }}%
+                    </div>
+                    <div class="text-gray-600 mb-1">计算公式：(当年净利润 / 平均净资产) × 100%</div>
+                    <div class="text-gray-600 mb-1">理想范围：15%以上为优秀，5-15%为良好，5%以下为需要改善</div>
+                    <div class="text-primary italic">
+                        建议：{{ '资产运营效率较高！' if metrics.roe >= 15 else '可以进一步提升资产利用效率' if metrics.roe >= 5 else '需要优化投资策略或成本控制' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

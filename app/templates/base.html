@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家庭财务健康跟踪系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/plugins/forms.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.5.1/dist/full.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/unified_style.css') }}">
+    <script>
+        tailwind.config = {
+            daisyui: {
+                themes: [
+                    {
+                        familyfinance: {
+                            // 与仪表盘统一的配色方案
+                            "base-100": "#f8f9fa",  // 浅灰色背景
+                            "base-200": "#ffffff",  // 白色卡片背景
+                            "base-300": "#f1f3f5",  // 浅灰边框/分隔线
+                            "base-content": "#343a40",  // 深灰文字
+                            // 强调色配置
+                            "primary": "#667eea",     // 紫色渐变 - 收入/积极数据
+                            "error": "#f5576c",       // 粉色渐变 - 支出/消极数据
+                            "success": "#43e97b",     // 绿色渐变 - 结余/成功
+                            "secondary": "#4facfe",   // 蓝色渐变 - 辅助色
+                        },
+                    },
+                ],
+            },
+        }
+    </script>
+    
+    <style>
+        /* 自定义样式 */
+        .main-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 260px;
+            position: relative;
+        }
+        
+        .sidebar .menu-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0 20px 20px 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 24px 0;
+            min-height: 100vh;
+        }
+        
+        .sidebar .menu {
+            background: transparent;
+            border-radius: 0;
+            padding: 0 16px;
+        }
+        
+        .sidebar .menu .menu-item {
+            margin-bottom: 8px;
+        }
+        
+        .sidebar .menu .menu-item a {
+            width: 100%;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        /* 非激活状态样式 */
+        .sidebar .menu .menu-item a:not(.active) {
+            background: rgba(102, 126, 234, 0.05);
+            color: #666;
+        }
+        
+        /* 激活状态样式 */
+        .sidebar .menu .menu-item a.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .sidebar .menu .menu-item a:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 内容区域 */
+        .content {
+            flex: 1;
+            padding: 32px;
+        }
+        
+        /* 标题 */
+        .content h1 {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 32px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+            }
+            
+            .sidebar .menu-container {
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body data-theme="familyfinance">
+    <div class="main-container">
+        <div class="flex h-full flex-col md:flex-row">
+            <!-- 左侧导航 -->
+            <div class="sidebar w-full md:w-64">
+                <div class="menu-container">
+                    <ul class="menu">
+                        <li class="menu-item">
+                            <a href="{{ url_for('main.index') }}" class="btn {% if request.endpoint == 'main.index' %}active{% endif %}">🏠 首页</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url_for('main.dashboard') }}" class="btn {% if request.endpoint == 'main.dashboard' %}active{% endif %}">📊 仪表盘</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url_for('main.import_data') }}" class="btn {% if request.endpoint == 'main.import_data' %}active{% endif %}">📁 CSV导入</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url_for('main.import_image') }}" class="btn {% if request.endpoint == 'main.import_image' %}active{% endif %}">📷 图像OCR导入</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url_for('main.data_list') }}" class="btn {% if request.endpoint == 'main.data_list' %}active{% endif %}">📋 详细数据列表</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url_for('main.income_statement') }}" class="btn {% if request.endpoint == 'main.income_statement' %}active{% endif %}">📈 收入利润表</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url_for('main.balance_sheet') }}" class="btn {% if request.endpoint == 'main.balance_sheet' %}active{% endif %}">💼 资产负债表</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url_for('main.cash_flow') }}" class="btn {% if request.endpoint == 'main.cash_flow' %}active{% endif %}">💸 现金流量表</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url_for('main.financial_health') }}" class="btn {% if request.endpoint == 'main.financial_health' %}active{% endif %}">📊 财务健康分析</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url_for('main.comparison_chart') }}" class="btn {% if request.endpoint == 'main.comparison_chart' %}active{% endif %}">🔄 收入支出对比</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url_for('main.data_cleanup') }}" class="btn {% if request.endpoint == 'main.data_cleanup' %}active{% endif %}">🧹 数据清理</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 右侧内容 -->
+            <div class="content flex-1">
+                <h1 class="text-center text-3xl font-bold text-gray-800 mb-6">🏠 家庭财务健康跟踪系统</h1>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            {% if category == 'success' %}
+                                <div class="alert alert-success mb-4">
+                                    {{ message }}
+                                </div>
+                            {% elif category == 'error' %}
+                                <div class="alert alert-error mb-4">
+                                    {{ message }}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info mb-4">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

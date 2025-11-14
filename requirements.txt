@@ -1,0 +1,10 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Pandas
+numpy
+matplotlib
+WTForms
+Flask-WTF
+python-dateutil
+beautifulsoup4

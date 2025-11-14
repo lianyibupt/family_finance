@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="unified-card">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">收入利润表</h2>
+        
+        <form method="GET" action="{{ url_for('main.income_statement') }}" class="flex gap-2 mb-6">
+            <div class="form-control">
+                <label for="year" class="label">年份：</label>
+                <input 
+                    type="number" 
+                    id="year" 
+                    name="year" 
+                    value="{{ year }}" 
+                    placeholder="2023"
+                    class="input input-bordered"
+                >
+            </div>
+            <div class="form-control">
+                <label for="period_type" class="label">期间类型：</label>
+                <select 
+                    id="period_type" 
+                    name="period_type" 
+                    class="select select-bordered"
+                >
+                    <option value="all" {% if period_type == 'all' or period_type is undefined %}selected{% endif %}>全部</option>
+                    <option value="monthly" {% if period_type == 'monthly' %}selected{% endif %}>月度</option>
+                    <option value="annual" {% if period_type == 'annual' %}selected{% endif %}>年度</option>
+                </select>
+            </div>
+            <div class="form-control self-end">
+                <button type="submit" class="btn btn-primary">查询</button>
+            </div>
+        </form>
+        
+        <div class="space-y-4">
+            <!-- 显示收入支出对比柱状图 -->
+            {% if chart_filename %}
+            <div class="overflow-x-auto">
+                <img src="{{ url_for('static', filename='charts/' + chart_filename) }}" alt="收入支出对比图表" style="max-width: 100%; height: auto;">
+            </div>
+            {% endif %}
+            
+            <div class="text-center space-y-2">
+                <h3 class="text-lg font-semibold text-primary">
+                    {{ year }}年 总收入：¥{{ total_income | round(2) }}
+                </h3>
+                <h3 class="text-lg font-semibold text-error">
+                    {{ year }}年 总支出：¥{{ total_expense | round(2) }}
+                </h3>
+                <h3 class="text-lg font-semibold text-{{ 'success' if net_surplus >= 0 else 'error' }}">
+                    {{ year }}年 结余：¥{{ net_surplus | round(2) }}
+                </h3>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="table table-zebra">
+                    <thead>
+                        <tr>
+                            <th>类别</th>
+                            <th>收入金额(元)</th>
+                            <th>支出金额(元)</th>
+                            <th>结余(元)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categories %}
+                        <tr>
+                            <td>{{ category }}</td>
+                            <td class="text-right text-success">¥{{ category_data[category]['income'] | round(2) }}</td>
+                            <td class="text-right text-error">¥{{ category_data[category]['expense'] | round(2) }}</td>
+                            <td class="text-right text-{{ 'success' if category_data[category]['surplus'] >= 0 else 'error' }}">
+                                ¥{{ category_data[category]['surplus'] | round(2) }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="bg-base-200 font-bold">
+                            <td>合计</td>
+                            <td class="text-right text-success">¥{{ total_income | round(2) }}</td>
+                            <td class="text-right text-error">¥{{ total_expense | round(2) }}</td>
+                            <td class="text-right text-{{ 'success' if net_surplus >= 0 else 'error' }}">
+                                ¥{{ net_surplus | round(2) }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

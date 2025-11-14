@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="section">
+        <h2>图像OCR导入</h2>
+            
+        <div class="tip">
+            <strong>使用说明：</strong>
+            <ul>
+                <li>确保LMstudio已启动OCR模型</li>
+                <li>支持JPG、PNG格式的银行分类报告（收入/支出汇总）</li>
+                <li>系统会自动识别分类名称和金额</li>
+                <li>支持金额格式：1.28万、8030.47、8,030.47</li>
+                <li>解析结果将显示预览，确认后导入</li>
+            </ul>
+        </div>
+            
+        <form class="upload-form" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="report_month">报告月份</label>
+                <input type="month" id="report_month" name="report_month" value="{{ current_year_month }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="data_type">数据类型</label>
+                <select id="data_type" name="data_type" required>
+                    <option value="income">收入</option>
+                    <option value="expense">支出</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="owner">所有者</label>
+                <select id="owner" name="owner" required>
+                    <option value="我">我</option>
+                    <option value="爱人">爱人</option>
+                    <option value="共同">共同</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="image">银行账单图像</label>
+                <input type="file" id="image" name="image" accept="image/jpeg,image/png" required>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="上传并识别">
+            </div>
+        </form>
+    </div>
+    
+    <style>
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        
+        h2 {
+            color: #555;
+            margin-bottom: 20px;
+        }
+        
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group select,
+        .form-group input[type="file"],
+        .form-group input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .form-group input[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .form-group input[type="submit"]:hover {
+            background-color: #218838;
+        }
+        
+        .tip {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+{% endblock %}
+

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="bg-base-100 rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">数据清理</h2>
+        
+        <!-- 数据统计 -->
+        <div class="alert alert-info mb-6">
+            <h3 class="text-lg font-semibold mb-2">当前数据统计</h3>
+            <div class="space-y-1">
+                <div class="stats-item">• 收入记录：{{ stats.income_count }} 条</div>
+                <div class="stats-item">• 支出记录：{{ stats.expense_count }} 条</div>
+                <div class="stats-item">• 资产记录：{{ stats.asset_count }} 条</div>
+                <div class="stats-item">• 负债记录：{{ stats.liability_count }} 条</div>
+                <div class="stats-item">• 总计：{{ stats.total_count }} 条</div>
+            </div>
+        </div>
+        
+        <!-- OCR数据清理 -->
+        <div class="card bg-base-200 shadow-lg mb-6">
+            <div class="card-body">
+                <div class="card-title">OCR导入数据清理</div>
+                <p class="text-gray-600 mb-4">清理OCR导入的重复记录或识别错误的记录</p>
+                
+                <form method="POST" action="{{ url_for('main.data_cleanup') }}">
+                    <input type="hidden" name="cleanup_type" value="ocr">
+                    
+                    <div class="form-control mb-4">
+                        <label for="ocr_month" class="label">月份：</label>
+                        <input 
+                            type="month" 
+                            id="ocr_month" 
+                            name="month" 
+                            required
+                            class="input input-bordered"
+                        >
+                    </div>
+                    
+                    <div class="form-control">
+                        <button type="submit" class="btn btn-error">清理指定月份的OCR记录</button>
+                    </div>
+                    
+                    <div class="alert alert-warning mt-4">
+                        <span>警告：此操作将删除指定月份所有OCR导入的记录！</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 重复数据清理 -->
+        <div class="card bg-base-200 shadow-lg mb-6">
+            <div class="card-body">
+                <div class="card-title">重复数据清理</div>
+                <p class="text-gray-600 mb-4">自动检测并清理重复的财务记录</p>
+                
+                <form method="POST" action="{{ url_for('main.data_cleanup') }}">
+                    <input type="hidden" name="cleanup_type" value="duplicate">
+                    
+                    <div class="form-control mb-4">
+                        <label for="duplicate_type" class="label">记录类型：</label>
+                        <select 
+                            id="duplicate_type" 
+                            name="record_type" 
+                            required
+                            class="select select-bordered"
+                        >
+                            <option value="income">收入</option>
+                            <option value="expense">支出</option>
+                            <option value="asset">资产</option>
+                            <option value="liability">负债</option>
+                            <option value="all">所有类型</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-control">
+                        <button type="submit" class="btn btn-warning">检测并清理重复记录</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 手工清理 -->
+        <div class="card bg-base-200 shadow-lg">
+            <div class="card-body">
+                <div class="card-title">手工清理</div>
+                <p class="text-gray-600 mb-4">根据条件手工清理指定记录</p>
+                
+                <form method="POST" action="{{ url_for('main.data_cleanup') }}">
+                    <input type="hidden" name="cleanup_type" value="manual">
+                    
+                    <div class="form-control mb-4">
+                        <label for="manual_type" class="label">记录类型：</label>
+                        <select 
+                            id="manual_type" 
+                            name="record_type" 
+                            required
+                            class="select select-bordered"
+                        >
+                            <option value="income">收入</option>
+                            <option value="expense">支出</option>
+                            <option value="asset">资产</option>
+                            <option value="liability">负债</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-control mb-4">
+                        <label for="manual_month" class="label">月份：</label>
+                        <input 
+                            type="month" 
+                            id="manual_month" 
+                            name="month"
+                            class="input input-bordered"
+                        >
+                    </div>
+                    
+                    <div class="form-control mb-4">
+                        <label for="manual_category" class="label">类别：</label>
+                        <input 
+                            type="text" 
+                            id="manual_category" 
+                            name="category" 
+                            placeholder="如：OCR识别"
+                            class="input input-bordered"
+                        >
+                    </div>
+                    
+                    <div class="form-control">
+                        <button type="submit" class="btn btn-danger">手工清理记录</button>
+                    </div>
+                    
+                    <div class="alert alert-error mt-4">
+                        <span>警告：此操作将删除符合条件的所有记录！</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

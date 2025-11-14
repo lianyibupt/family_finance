@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="bg-base-100 rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">OCR识别结果预览</h2>
+        
+        <div class="result-container space-y-6">
+            <div class="raw-content card bg-base-200">
+                <div class="card-body">
+                    <h3 class="card-title">原始识别内容：</h3>
+                    <pre class="bg-base-100 p-4 rounded-lg overflow-x-auto">{{ raw_content }}</pre>
+                </div>
+            </div>
+            
+            <div class="category-list card bg-base-200">
+                <div class="card-body">
+                    <h3 class="card-title">解析后分类：</h3>
+                    <form method="POST" action="{{ url_for('main.confirm_ocr_import') }}">
+                        <input type="hidden" name="merged_content" value="{{ merged_content }}">
+                        <input type="hidden" name="report_month" value="{{ report_month }}">
+                        <input type="hidden" name="data_type" value="{{ data_type }}">
+                        <input type="hidden" name="owner" value="{{ owner }}">
+                        
+                        <div class="overflow-x-auto">
+                            <table class="table table-zebra">
+                                <thead>
+                                    <tr>
+                                        <th>选择</th>
+                                        <th>分类名称</th>
+                                        <th>金额</th>
+                                        <th>类型</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for category in categories %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" name="selected_items" value="{{ loop.index0 }}" checked>
+                                        </td>
+                                        <td>{{ category['category_name'] }}</td>
+                                        <td>¥{{ category['amount'] }}</td>
+                                        <td class="badge badge-{{ 'primary' if category['type'] == 'income' else 'error' }}">
+                                            {{ category['type'] }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="form-actions space-x-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                ✅ 确认导入
+                            </button>
+                            <a href="{{ url_for('main.import_image') }}" class="btn btn-secondary">
+                                ❌ 取消
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            .card {
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+        </style>
+    </div>
+{% endblock %}

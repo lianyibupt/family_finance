@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="section">
+        <h2>欢迎使用</h2>
+        <p>这是一个家庭财务健康跟踪与分析系统，帮助您：</p>
+        <ul>
+            <li>📊 定期导入收入、支出、资产、负债数据</li>
+            <li>📈 自动生成财务报表（收入利润表、资产负债表、现金流量表）</li>
+            <li>💡 分析家庭财务健康状况</li>
+            <li>🎯 提供理财建议</li>
+        </ul>
+        <p>请先点击左侧导航栏的"数据导入"按钮开始导入您的财务数据！</p>
+    </div>
+    
+    <style>
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        
+        h2 {
+            color: #555;
+        }
+    </style>
+{% endblock %}

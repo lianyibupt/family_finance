@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="bg-base-100 rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">数据列表</h2>
+        
+        <div class="filter-bar bg-base-200 rounded-lg p-4 mb-6">
+            <form method="GET" action="{{ url_for('main.data_list') }}">
+                <select name="data_type" class="select select-bordered" onchange="this.form.submit()">
+                    <option value="all" {% if data_type == 'all' %}selected{% endif %}>所有数据</option>
+                    <option value="income" {% if data_type == 'income' %}selected{% endif %}>收入</option>
+                    <option value="expense" {% if data_type == 'expense' %}selected{% endif %}>支出</option>
+                    <option value="asset" {% if data_type == 'asset' %}selected{% endif %}>资产</option>
+                    <option value="liability" {% if data_type == 'liability' %}selected{% endif %}>负债</option>
+                </select>
+            </form>
+        </div>
+        
+        <div class="table-container overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>类别</th>
+                        <th>金额</th>
+                        <th>类型</th>
+                        <th>来源/支付人/所有者</th>
+                        <th>描述</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data_items %}
+                    <tr id="data_row_{{ item.id }}">
+                        <td>
+                            {% if 'date' in item.__dict__ %}
+                                {{ item.date.strftime('%Y-%m-%d') }}
+                            {% elif 'update_date' in item.__dict__ %}
+                                {{ item.update_date.strftime('%Y-%m-%d') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if 'category' in item.__dict__ %}
+                                {{ item.category }}
+                            {% elif 'type' in item.__dict__ %}
+                                {{ item.type }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ item.amount | round(2) }}</td>
+                        <td>
+                            {% if data_type == 'income' %}
+                                <span class="badge badge-primary">收入</span>
+                            {% elif data_type == 'expense' %}
+                                <span class="badge badge-error">支出</span>
+                            {% elif data_type == 'asset' %}
+                                <span class="badge badge-success">资产</span>
+                            {% elif data_type == 'liability' %}
+                                <span class="badge badge-warning">负债</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if 'source' in item.__dict__ %}
+                                {{ item.source }}
+                            {% elif 'payer' in item.__dict__ %}
+                                {{ item.payer }}
+                            {% elif 'owner' in item.__dict__ %}
+                                {{ item.owner }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ item.description if item.description else '-' }}</td>
+                        <td class="flex items-center space-x-1">
+                            <button 
+                                onclick="showEditForm('{{ item.id }}', '{{ data_type }}')"
+                                class="btn btn-warning btn-xs"
+                            >
+                                编辑
+                            </button>
+                            
+                            <form method="POST" action="{{ url_for('main.delete_data') }}" style="display: inline;">
+                                <input type="hidden" name="id" value="{{ item.id }}">
+                                <input type="hidden" name="data_type" value="{{ data_type }}">
+                                <button 
+                                    type="submit"
+                                    class="btn btn-error btn-xs"
+                                    onclick="return confirm('确定要删除这条记录吗？');"
+                                >
+                                    删除
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    
+                    <!-- 编辑表单行 -->
+                    <tr id="edit_row_{{ item.id }}" class="hidden">
+                        <td colspan="7">
+                            <form method="POST" action="{{ url_for('main.edit_data') }}" class="edit-form space-x-2">
+                                <input type="hidden" name="id" value="{{ item.id }}">
+                                <input type="hidden" name="data_type" value="{{ data_type }}">
+                                
+                                <div class="form-control">
+                                    <label class="label label-text">日期：</label>
+                                    <input 
+                                        type="text" 
+                                        name="date" 
+                                        value="
+                                            {% if 'date' in item.__dict__ %}
+                                                {{ item.date.strftime('%Y-%m-%d') }}
+                                            {% elif 'update_date' in item.__dict__ %}
+                                                {{ item.update_date.strftime('%Y-%m-%d') }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        " 
+                                        required
+                                        class="input input-bordered input-sm"
+                                    >
+                                </div>
+                                
+                                <div class="form-control">
+                                    <label class="label label-text">类别：</label>
+                                    <input 
+                                        type="text" 
+                                        name="category" 
+                                        value="
+                                            {% if 'category' in item.__dict__ %}
+                                                {{ item.category }}
+                                            {% elif 'type' in item.__dict__ %}
+                                                {{ item.type }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        " 
+                                        required
+                                        class="input input-bordered input-sm"
+                                    >
+                                </div>
+                                
+                                <div class="form-control">
+                                    <label class="label label-text">金额：</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.01" 
+                                        name="amount" 
+                                        value="{{ item.amount | round(2) }}" 
+                                        required
+                                        class="input input-bordered input-sm"
+                                    >
+                                </div>
+                                
+                                {% if data_type == 'income' %}
+                                    <div class="form-control">
+                                        <label class="label label-text">来源：</label>
+                                        <input 
+                                            type="text" 
+                                            name="source" 
+                                            value="{{ item.source }}" 
+                                            required
+                                            class="input input-bordered input-sm"
+                                        >
+                                    </div>
+                                {% elif data_type == 'expense' %}
+                                    <div class="form-control">
+                                        <label class="label label-text">支付人：</label>
+                                        <input 
+                                            type="text" 
+                                            name="payer" 
+                                            value="{{ item.payer }}" 
+                                            required
+                                            class="input input-bordered input-sm"
+                                        >
+                                    </div>
+                                {% elif data_type in ['asset', 'liability'] %}
+                                    <div class="form-control">
+                                        <label class="label label-text">所有者：</label>
+                                        <input 
+                                            type="text" 
+                                            name="owner" 
+                                            value="{{ item.owner }}" 
+                                            required
+                                            class="input input-bordered input-sm"
+                                        >
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="form-control">
+                                    <label class="label label-text">描述：</label>
+                                    <input 
+                                        type="text" 
+                                        name="description" 
+                                        value="{{ item.description or '' }}"
+                                        class="input input-bordered input-sm"
+                                    >
+                                </div>
+                                
+                                <div class="form-control">
+                                    <button type="submit" class="btn btn-success btn-sm">保存</button>
+                                    <button 
+                                        type="button" 
+                                        onclick="hideEditForm('{{ item.id }}')"
+                                        class="btn btn-outline btn-sm ml-1"
+                                    >
+                                        取消
+                                    </button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        function showEditForm(id, dataType) {
+            // 隐藏其他编辑表单
+            document.querySelectorAll('[id^="edit_row_"]').forEach(row => {
+                row.classList.add('hidden');
+            });
+            
+            // 显示当前编辑表单
+            const editRow = document.getElementById(`edit_row_${id}`);
+            editRow.classList.remove('hidden');
+        }
+        
+        function hideEditForm(id) {
+            const editRow = document.getElementById(`edit_row_${id}`);
+            editRow.classList.add('hidden');
+        }
+    </script>
+{% endblock %}

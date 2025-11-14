@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="section">
+        <h2>CSV数据导入</h2>
+        <form class="upload-form" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="data_type">数据类型</label>
+                <select id="data_type" name="data_type" required>
+                    <option value="income">收入</option>
+                    <option value="expense">支出</option>
+                    <option value="asset">资产</option>
+                    <option value="liability">负债</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="file">CSV文件</label>
+                <input type="file" id="file" name="file" accept=".csv" required>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="导入数据">
+            </div>
+        </form>
+    </div>
+    
+    <div class="section">
+        <h2>CSV导入格式说明</h2>
+        
+        <div class="collapse collapse-arrow bg-base-200">
+            <input type="radio" name="accordion-1" checked="checked" />
+            <div class="collapse-title text-xl font-medium">
+                💡 收入数据格式 (income)
+            </div>
+            <div class="collapse-content">
+                <h4>必填字段:</h4>
+                <ul class="list-disc pl-5">
+                    <li><strong>date</strong>: 日期 (格式: YYYY-MM-DD，例如: 2023-01-15)</li>
+                    <li><strong>category</strong>: 收入类别 (例如: 工资, 奖金, 投资收益)</li>
+                    <li><strong>amount</strong>: 金额 (数字，例如: 5000.00)</li>
+                    <li><strong>source</strong>: 收入来源 (例如: 工作单位, 股票账户)</li>
+                </ul>
+                
+                <h4>可选字段:</h4>
+                <ul class="list-disc pl-5">
+                    <li><strong>description</strong>: 备注说明 (例如: 1月份工资)</li>
+                    <li><strong>period_type</strong>: 期间类型 (monthly或annual, 默认: monthly)</li>
+                </ul>
+                
+                <h4>示例:</h4>
+                <pre>date,category,amount,source,description,period_type
+2023-01-15,工资,10000.00,工作单位,1月份工资,monthly
+2023-02-05,奖金,5000.00,工作单位,年终奖,monthly
+2023-03-20,投资收益,1500.50,股票账户,股票分红,monthly
+2023-01-01,年度奖金,20000.00,工作单位,2022年度奖金,annual
+</pre>
+            </div>
+        </div>
+        
+        <div class="collapse collapse-arrow bg-base-200 mt-4">
+            <input type="radio" name="accordion-1" />
+            <div class="collapse-title text-xl font-medium">
+                💸 支出数据格式 (expense)
+            </div>
+            <div class="collapse-content">
+                <h4>必填字段:</h4>
+                <ul class="list-disc pl-5">
+                    <li><strong>date</strong>: 日期 (格式: YYYY-MM-DD)</li>
+                    <li><strong>category</strong>: 支出类别 (例如: 房租, 餐饮, 交通)</li>
+                    <li><strong>amount</strong>: 金额 (数字)</li>
+                    <li><strong>payer</strong>: 支付人 (例如: 我, 爱人, 共同)</li>
+                </ul>
+                
+                <h4>可选字段:</h4>
+                <ul class="list-disc pl-5">
+                    <li><strong>description</strong>: 备注说明 (例如: 1月份房租)</li>
+                    <li><strong>period_type</strong>: 期间类型 (monthly或annual, 默认: monthly)</li>
+                </ul>
+                
+                <h4>示例:</h4>
+                <pre>date,category,amount,payer,description,period_type
+2023-01-05,房租,3000.00,爱人,1月份房租,monthly
+2023-01-10,餐饮,250.00,共同,朋友聚餐,monthly
+2023-01-15,交通,180.00,我,地铁充值,monthly
+2023-01-01,年度保险,5000.00,共同,2023年度医疗保险,annual
+</pre>
+            </div>
+        </div>
+        
+        <div class="collapse collapse-arrow bg-base-200 mt-4">
+            <input type="radio" name="accordion-1" />
+            <div class="collapse-title text-xl font-medium">
+                💰 资产数据格式 (asset)
+            </div>
+            <div class="collapse-content">
+                <h4>必填字段:</h4>
+                <ul class="list-disc pl-5">
+                    <li><strong>name</strong>: 资产名称 (例如: 招商银行, 基金投资)</li>
+                    <li><strong>type</strong>: 资产类型 (例如: 银行存款, 基金, 房产)</li>
+                    <li><strong>amount</strong>: 金额 (数字)</li>
+                    <li><strong>owner</strong>: 所有者 (例如: 我, 爱人, 共同)</li>
+                    <li><strong>update_date</strong>: 更新日期 (格式: YYYY-MM-DD)</li>
+                </ul>
+                
+                <h4>可选字段:</h4>
+                <ul class="list-disc pl-5">
+                    <li><strong>description</strong>: 备注说明 (例如: 储蓄卡)</li>
+                    <li><strong>period_type</strong>: 期间类型 (monthly或annual, 默认: monthly)</li>
+                </ul>
+                
+                <h4>示例:</h4>
+                <pre>name,type,amount,owner,update_date,description,period_type
+招商银行,银行存款,50000.00,我,2023-01-31,储蓄卡,monthly
+基金投资,基金,30000.00,爱人,2023-01-31,股票基金,monthly
+房产,房产,1000000.00,共同,2023-01-31,自住房产,annual
+</pre>
+            </div>
+        </div>
+        
+        <div class="collapse collapse-arrow bg-base-200 mt-4">
+            <input type="radio" name="accordion-1" />
+            <div class="collapse-title text-xl font-medium">
+                💳 负债数据格式 (liability)
+            </div>
+            <div class="collapse-content">
+                <h4>必填字段:</h4>
+                <ul class="list-disc pl-5">
+                    <li><strong>name</strong>: 负债名称 (例如: 房贷, 信用卡)</li>
+                    <li><strong>type</strong>: 负债类型 (例如: 房贷, 信用卡, 消费贷款)</li>
+                    <li><strong>amount</strong>: 金额 (数字)</li>
+                    <li><strong>owner</strong>: 所有者 (例如: 我, 爱人, 共同)</li>
+                    <li><strong>update_date</strong>: 更新日期 (格式: YYYY-MM-DD)</li>
+                </ul>
+                
+                <h4>可选字段:</h4>
+                <ul class="list-disc pl-5">
+                    <li><strong>description</strong>: 备注说明 (例如: 住房贷款)</li>
+                    <li><strong>period_type</strong>: 期间类型 (monthly或annual, 默认: monthly)</li>
+                </ul>
+                
+                <h4>示例:</h4>
+                <pre>name,type,amount,owner,update_date,description,period_type
+房贷,房贷,500000.00,共同,2023-01-31,住房贷款,monthly
+信用卡,信用卡,8500.00,我,2023-01-31,招商银行信用卡,monthly
+年度贷款利息,贷款利息,12000.00,共同,2023-01-31,2022年度贷款利息,annual
+</pre>
+            </div>
+        </div>
+        
+        <div class="mt-4 alert alert-info">
+            <strong>⚠️ 注意事项:</strong>
+            <ul class="list-disc pl-5 mt-2">
+                <li>CSV文件必须使用英文逗号(,)作为分隔符</li>
+                <li>日期格式必须严格为YYYY-MM-DD</li>
+                <li>金额字段必须为数字，不能包含货币符号或千位分隔符</li>
+                <li>可选字段缺失时，导入时会自动填充为NULL</li>
+            </ul>
+        </div>
+    </div>
+    
+    <style>
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        
+        h2 {
+            color: #555;
+            margin-bottom: 20px;
+        }
+        
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group select,
+        .form-group input[type="file"],
+        .form-group input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .form-group input[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .form-group input[type="submit"]:hover {
+            background-color: #218838;
+        }
+        
+        pre {
+            background-color: white;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+{% endblock %}
