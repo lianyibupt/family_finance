@@ -137,7 +137,7 @@
         /* KPI卡片网格布局 */
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(2, minmax(300px, 1fr));
             gap: 28px;
             margin-bottom: 48px;
         }
@@ -299,127 +299,130 @@
 <!-- 引入Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <script>
-      // 柱状图配置
-      const ctx = document.getElementById('expenseChart').getContext('2d');
-      const barChartData = {{ bar_chart_data | tojson | safe }};
-      
-      new Chart(ctx, {
-          type: 'bar',
-          data: {
-              labels: barChartData.months,
-              datasets: [
-                  {
-                      label: '收入',
-                      data: barChartData.incomes,
-                      backgroundColor: 'rgba(72, 187, 120, 0.8)',
-                      borderColor: 'rgba(72, 187, 120, 1)',
-                      borderWidth: 2,
-                      borderRadius: 12,
-                      borderSkipped: false,
-                      hoverBackgroundColor: 'rgba(72, 187, 120, 1)',
-                      hoverBorderColor: 'rgba(72, 187, 120, 1)',
-                      hoverBorderWidth: 3,
-                      shadowBlur: 10,
-                      shadowOffsetX: 0,
-                      shadowOffsetY: 4,
-                      shadowColor: 'rgba(72, 187, 120, 0.3)'
-                  },
-                  {
-                      label: '支出',
-                      data: barChartData.expenses,
-                      backgroundColor: 'rgba(245, 101, 101, 0.8)',
-                      borderColor: 'rgba(245, 101, 101, 1)',
-                      borderWidth: 2,
-                      borderRadius: 12,
-                      borderSkipped: false,
-                      hoverBackgroundColor: 'rgba(245, 101, 101, 1)',
-                      hoverBorderColor: 'rgba(245, 101, 101, 1)',
-                      hoverBorderWidth: 3,
-                      shadowBlur: 10,
-                      shadowOffsetX: 0,
-                      shadowOffsetY: 4,
-                      shadowColor: 'rgba(245, 101, 101, 0.3)'
-                  }
-              ]
-          },
-          options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                  legend: {
-                      position: 'bottom',
-                      labels: {
-                          padding: 20,
-                          font: {
-                              size: 14,
-                              weight: 'bold'
-                          },
-                          color: '#374151'
+      // Wait for the DOM to be fully loaded before initializing the chart
+      document.addEventListener('DOMContentLoaded', function() {
+          // 柱状图配置
+          const ctx = document.getElementById('expenseChart').getContext('2d');
+          const barChartData = {{ bar_chart_data | tojson | safe }};
+          
+          new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: barChartData.months,
+                  datasets: [
+                      {
+                          label: '收入',
+                          data: barChartData.incomes,
+                          backgroundColor: 'rgba(72, 187, 120, 0.8)',
+                          borderColor: 'rgba(72, 187, 120, 1)',
+                          borderWidth: 2,
+                          borderRadius: 12,
+                          borderSkipped: false,
+                          hoverBackgroundColor: 'rgba(72, 187, 120, 1)',
+                          hoverBorderColor: 'rgba(72, 187, 120, 1)',
+                          hoverBorderWidth: 3,
+                          shadowBlur: 10,
+                          shadowOffsetX: 0,
+                          shadowOffsetY: 4,
+                          shadowColor: 'rgba(72, 187, 120, 0.3)'
                       },
-                      onHover: function(event, legendItem) {
-                          event.native.target.style.cursor = 'pointer';
+                      {
+                          label: '支出',
+                          data: barChartData.expenses,
+                          backgroundColor: 'rgba(245, 101, 101, 0.8)',
+                          borderColor: 'rgba(245, 101, 101, 1)',
+                          borderWidth: 2,
+                          borderRadius: 12,
+                          borderSkipped: false,
+                          hoverBackgroundColor: 'rgba(245, 101, 101, 1)',
+                          hoverBorderColor: 'rgba(245, 101, 101, 1)',
+                          hoverBorderWidth: 3,
+                          shadowBlur: 10,
+                          shadowOffsetX: 0,
+                          shadowOffsetY: 4,
+                          shadowColor: 'rgba(245, 101, 101, 0.3)'
                       }
-                  },
-                  tooltip: {
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                      titleColor: '#1f2937',
-                      bodyColor: '#4b5563',
-                      borderColor: '#e5e7eb',
-                      borderWidth: 1,
-                      padding: 12,
-                      borderRadius: 12,
-                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                      callbacks: {
-                          label: function(context) {
-                              const label = context.dataset.label || '';
-                              const value = context.parsed.y || 0;
-                              return `${label}: ¥${value.toFixed(2)}`;
-                          }
-                      }
-                  },
-                  animation: {
-                      animateScale: true,
-                      animateRotate: false,
-                      duration: 800,
-                      easing: 'easeOutExpo'
-                  }
+                  ]
               },
-              scales: {
-                  y: {
-                      beginAtZero: true,
-                      grid: {
-                          color: 'rgba(0, 0, 0, 0.05)',
-                          drawBorder: false
-                      },
-                      ticks: {
-                          color: '#6b7280',
-                          font: {
-                              size: 12
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                      legend: {
+                          position: 'bottom',
+                          labels: {
+                              padding: 20,
+                              font: {
+                                  size: 14,
+                                  weight: 'bold'
+                              },
+                              color: '#374151'
                           },
-                          callback: function(value, index, ticks) {
-                              return '¥' + value;
+                          onHover: function(event, legendItem) {
+                              event.native.target.style.cursor = 'pointer';
+                          }
+                      },
+                      tooltip: {
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          titleColor: '#1f2937',
+                          bodyColor: '#4b5563',
+                          borderColor: '#e5e7eb',
+                          borderWidth: 1,
+                          padding: 12,
+                          borderRadius: 12,
+                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                          callbacks: {
+                              label: function(context) {
+                                  const label = context.dataset.label || '';
+                                  const value = context.parsed.y || 0;
+                                  return `${label}: ¥${value.toFixed(2)}`;
+                              }
+                          }
+                      },
+                      animation: {
+                          animateScale: true,
+                          animateRotate: false,
+                          duration: 800,
+                          easing: 'easeOutExpo'
+                      }
+                  },
+                  scales: {
+                      y: {
+                          beginAtZero: true,
+                          grid: {
+                              color: 'rgba(0, 0, 0, 0.05)',
+                              drawBorder: false
+                          },
+                          ticks: {
+                              color: '#6b7280',
+                              font: {
+                                  size: 12
+                              },
+                              callback: function(value, index, ticks) {
+                                  return '¥' + value;
+                              }
+                          }
+                      },
+                      x: {
+                          grid: {
+                              display: false,
+                              drawBorder: false
+                          },
+                          ticks: {
+                              color: '#6b7280',
+                              font: {
+                                  size: 12,
+                                  weight: 'bold'
+                              }
                           }
                       }
                   },
-                  x: {
-                      grid: {
-                          display: false,
-                          drawBorder: false
-                      },
-                      ticks: {
-                          color: '#6b7280',
-                          font: {
-                              size: 12,
-                              weight: 'bold'
-                          }
-                      }
+                  interaction: {
+                      mode: 'index',
+                      intersect: false
                   }
-              },
-              interaction: {
-                  mode: 'index',
-                  intersect: false
               }
-          }
+          });
       });
   </script>
 {% endblock %}

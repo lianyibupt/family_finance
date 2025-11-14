@@ -999,8 +999,8 @@ def dashboard():
     
     for m in months:
         # 计算该月份的收入和支出
-        monthly_income = sum(income.amount for income in incomes if db.extract('month', income.date) == m)
-        monthly_expense = sum(expense.amount for expense in expenses if db.extract('month', expense.date) == m)
+        monthly_income = sum(income.amount for income in incomes if income.date.month == m)
+        monthly_expense = sum(expense.amount for expense in expenses if expense.date.month == m)
         
         month_name = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'][m-1]
         monthly_data.append({
