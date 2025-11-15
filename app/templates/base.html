@@ -39,69 +39,79 @@
             padding: 0;
             margin: 0;
             display: flex;
+            flex-direction: column;
         }
         
-        /* 侧边栏样式 */
-        .sidebar {
-            width: 220px;
-            position: relative;
-        }
-        
-        .sidebar .menu-container {
+        /* 顶部导航栏样式 */
+        .header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 0 20px 20px 0;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            padding: 24px 0;
-            min-height: 100vh;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         
-        .sidebar .menu {
-            background: transparent;
-            border-radius: 0;
-            padding: 0 16px;
+        .nav-container {
+            max-width: 100%;
+            margin: 0 auto;
         }
         
-        .sidebar .menu .menu-item {
-            margin-bottom: 8px;
+        .top-menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
         
-        .sidebar .menu .menu-item a {
-            width: 100%;
+        .top-menu .menu-item {
+            margin: 0;
+        }
+        
+        .top-menu .menu-item a {
             border-radius: 12px;
-            padding: 12px 16px;
+            padding: 8px 16px;
             font-weight: 500;
-            font-size: 15px;
+            font-size: 14px;
             transition: all 0.3s ease;
             border: 2px solid transparent;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
         
         /* 非激活状态样式 */
-        .sidebar .menu .menu-item a:not(.active) {
+        .top-menu .menu-item a:not(.active) {
             background: rgba(102, 126, 234, 0.05);
             color: #666;
         }
         
         /* 激活状态样式 */
-        .sidebar .menu .menu-item a.active {
+        .top-menu .menu-item a.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border-color: rgba(102, 126, 234, 0.3);
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
         
-        .sidebar .menu .menu-item a:hover {
-            transform: translateX(4px);
+        .top-menu .menu-item a:hover {
+            transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         
-        /* 内容区域 */
+        /* 内容区域 - 平铺到整个屏幕 */
         .content {
             flex: 1;
             width: 100%;
             padding: 20px;
             margin: 0;
+            max-width: 100%;
         }
         
         /* 标题 */
@@ -112,67 +122,73 @@
             color: #1a202c;
             margin-bottom: 32px;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            text-align: center;
         }
         
         /* 响应式设计 */
         @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
+            .top-menu {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 8px;
             }
             
-            .sidebar .menu-container {
-                border-radius: 0;
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .content {
+                padding: 16px;
             }
         }
     </style>
 </head>
 <body data-theme="familyfinance">
     <div class="main-container">
-        <div class="flex h-full flex-col md:flex-row">
-            <!-- 左侧导航 -->
-            <div class="sidebar w-full md:w-64">
-                <div class="menu-container">
-                    <ul class="menu">
-                        <li class="menu-item">
-                            <a href="{{ url_for('main.index') }}" class="btn {% if request.endpoint == 'main.index' %}active{% endif %}">🏠 首页</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url_for('main.dashboard') }}" class="btn {% if request.endpoint == 'main.dashboard' %}active{% endif %}">📊 仪表盘</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url_for('main.import_data') }}" class="btn {% if request.endpoint == 'main.import_data' %}active{% endif %}">📁 CSV导入</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url_for('main.import_image') }}" class="btn {% if request.endpoint == 'main.import_image' %}active{% endif %}">📷 图像OCR导入</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url_for('main.data_list') }}" class="btn {% if request.endpoint == 'main.data_list' %}active{% endif %}">📋 详细数据列表</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url_for('main.income_statement') }}" class="btn {% if request.endpoint == 'main.income_statement' %}active{% endif %}">📈 收入利润表</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url_for('main.balance_sheet') }}" class="btn {% if request.endpoint == 'main.balance_sheet' %}active{% endif %}">💼 资产负债表</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url_for('main.cash_flow') }}" class="btn {% if request.endpoint == 'main.cash_flow' %}active{% endif %}">💸 现金流量表</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url_for('main.financial_health') }}" class="btn {% if request.endpoint == 'main.financial_health' %}active{% endif %}">📊 财务健康分析</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url_for('main.comparison_chart') }}" class="btn {% if request.endpoint == 'main.comparison_chart' %}active{% endif %}">🔄 收入支出对比</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url_for('main.data_cleanup') }}" class="btn {% if request.endpoint == 'main.data_cleanup' %}active{% endif %}">🧹 数据清理</a>
-                        </li>
-                    </ul>
-                </div>
+        <!-- 顶部导航 -->
+        <header class="header">
+            <div class="nav-container">
+                <ul class="top-menu">
+                    <li class="menu-item">
+                        <a href="{{ url_for('main.index') }}" {% if request.endpoint == 'main.index' %}class="active"{% endif %}>🏠 首页</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url_for('main.dashboard') }}" {% if request.endpoint == 'main.dashboard' %}class="active"{% endif %}>📊 仪表盘</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url_for('main.import_data') }}" {% if request.endpoint == 'main.import_data' %}class="active"{% endif %}>📁 CSV导入</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url_for('main.import_image') }}" {% if request.endpoint == 'main.import_image' %}class="active"{% endif %}>📷 图像OCR导入</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url_for('main.data_list') }}" {% if request.endpoint == 'main.data_list' %}class="active"{% endif %}>📋 详细数据列表</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url_for('main.income_statement') }}" {% if request.endpoint == 'main.income_statement' %}class="active"{% endif %}>📈 收入利润表</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url_for('main.balance_sheet') }}" {% if request.endpoint == 'main.balance_sheet' %}class="active"{% endif %}>💼 资产负债表</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url_for('main.cash_flow') }}" {% if request.endpoint == 'main.cash_flow' %}class="active"{% endif %}>💸 现金流量表</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url_for('main.financial_health') }}" {% if request.endpoint == 'main.financial_health' %}class="active"{% endif %}>📊 财务健康分析</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url_for('main.comparison_chart') }}" {% if request.endpoint == 'main.comparison_chart' %}class="active"{% endif %}>🔄 收入支出对比</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url_for('main.data_cleanup') }}" {% if request.endpoint == 'main.data_cleanup' %}class="active"{% endif %}>🧹 数据清理</a>
+                    </li>
+                </ul>
             </div>
-            
-            <!-- 右侧内容 -->
-            <div class="content flex-1">
-                <h1 class="text-center text-3xl font-bold text-gray-800 mb-6">🏠 家庭财务健康跟踪系统</h1>
+        </header>
+        
+        <!-- 主要内容区域 - 平铺到整个屏幕 -->
+        <main class="content">
+            <h1>🏠 家庭财务健康跟踪系统</h1>
                 
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -196,8 +212,7 @@
                 
                 {% block content %}
                 {% endblock %}
-            </div>
-        </div>
+        </main>
     </div>
 </body>
 </html>

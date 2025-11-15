@@ -71,7 +71,7 @@ python run.py
 
 ### 3. 访问应用
 
-打开浏览器访问：`http://127.0.0.1:5002`
+打开浏览器访问：`http://127.0.0.1:5000`
 
 ## 使用说明
 
@@ -156,20 +156,6 @@ name,type,amount,owner,update_date,description
 - 上传文件大小限制
 - 上传目录
 
-## 开发
-
-### 数据库迁移
-
-```bash
-# 初始化迁移
-flask db init
-
-# 创建迁移脚本
-flask db migrate -m "create tables"
-
-# 应用迁移
-flask db upgrade
-```
 
 ### 代码结构
 
