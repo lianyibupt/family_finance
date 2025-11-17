@@ -145,27 +145,47 @@ def import_liability(df):
 @main.route('/income_statement', methods=['GET'])
 def income_statement():
     """收入利润表"""
-    year = request.args.get('year', datetime.now().year)
+    # 获取所有有收入或支出数据的年份
+    all_years = set()
+    for income in Income.query.all():
+        all_years.add(income.date.year)
+    for expense in Expense.query.all():
+        all_years.add(expense.date.year)
+    all_years = sorted(list(all_years), reverse=True)
+    
+    # 默认年份为最新有数据的年份，若无数据则为当前年份
+    default_year = all_years[0] if all_years else datetime.now().year
+    year = request.args.get('year', default_year)
     period_type = request.args.get('period_type', 'all')
     
     try:
         year = int(year)
     except ValueError:
-        year = datetime.now().year
+        year = default_year
     
     # 查询收入和支出，并根据period_type过滤
     if period_type == 'all':
-        incomes = Income.query.filter(db.extract('year', Income.date) == year).all()
-        expenses = Expense.query.filter(db.extract('year', Expense.date) == year).all()
+        # 查询所有收入记录并按年份过滤（兼容SQLite）
+        incomes = []
+        for income in Income.query.all():
+            if income.date.year == year:
+                incomes.append(income)
+        # 查询所有支出记录并按年份过滤（兼容SQLite）
+        expenses = []
+        for expense in Expense.query.all():
+            if expense.date.year == year:
+                expenses.append(expense)
     else:
-        incomes = Income.query.filter(
-            db.extract('year', Income.date) == year,
-            Income.period_type == period_type
-        ).all()
-        expenses = Expense.query.filter(
-            db.extract('year', Expense.date) == year,
-            Expense.period_type == period_type
-        ).all()
+        # 查询所有收入记录并按年份和期间类型过滤（兼容SQLite）
+        incomes = []
+        for income in Income.query.all():
+            if income.date.year == year and income.period_type == period_type:
+                incomes.append(income)
+        # 查询所有支出记录并按年份和期间类型过滤（兼容SQLite）
+        expenses = []
+        for expense in Expense.query.all():
+            if expense.date.year == year and expense.period_type == period_type:
+                expenses.append(expense)
     
     # 计算总收入和总支出
     total_income = sum(income.amount for income in incomes)
@@ -219,27 +239,41 @@ def income_statement():
 @main.route('/balance_sheet', methods=['GET'])
 def balance_sheet():
     """资产负债表"""
-    year = request.args.get('year', datetime.now().year)
+    # 获取所有有资产或负债数据的年份
+    all_years = set()
+    for asset in Asset.query.all():
+        all_years.add(asset.update_date.year)
+    for liability in Liability.query.all():
+        all_years.add(liability.update_date.year)
+    all_years = sorted(list(all_years), reverse=True)
+    
+    # 默认年份为最新有数据的年份，若无数据则为当前年份
+    default_year = all_years[0] if all_years else datetime.now().year
+    year = request.args.get('year', default_year)
     period_type = request.args.get('period_type', 'all')
     
     try:
         year = int(year)
     except ValueError:
-        year = datetime.now().year
+        year = default_year
     
-    # 查询资产和负债，并根据period_type过滤
-    if period_type == 'all':
-        assets = Asset.query.filter(db.extract('year', Asset.update_date) == year).all()
-        liabilities = Liability.query.filter(db.extract('year', Liability.update_date) == year).all()
-    else:
-        assets = Asset.query.filter(
-            db.extract('year', Asset.update_date) == year,
-            Asset.period_type == period_type
-        ).all()
-        liabilities = Liability.query.filter(
-            db.extract('year', Liability.update_date) == year,
-            Liability.period_type == period_type
-        ).all()
+    # 查询资产和负债，并根据period_type过滤（兼容SQLite）
+    assets = []
+    for asset in Asset.query.all():
+        match = False
+        if asset.update_date.year == year:
+            if period_type == 'all' or asset.period_type == period_type:
+                match = True
+        if match:
+            assets.append(asset)
+    liabilities = []
+    for liability in Liability.query.all():
+        match = False
+        if liability.update_date.year == year:
+            if period_type == 'all' or liability.period_type == period_type:
+                match = True
+        if match:
+            liabilities.append(liability)
     
     # 计算总资产和总负债
     total_assets = sum(asset.amount for asset in assets)
@@ -287,27 +321,41 @@ def balance_sheet():
 @main.route('/cash_flow', methods=['GET'])
 def cash_flow():
     """现金流量表"""
-    year = request.args.get('year', datetime.now().year)
+    # 获取所有有收入或支出数据的年份
+    all_years = set()
+    for income in Income.query.all():
+        all_years.add(income.date.year)
+    for expense in Expense.query.all():
+        all_years.add(expense.date.year)
+    all_years = sorted(list(all_years), reverse=True)
+    
+    # 默认年份为最新有数据的年份，若无数据则为当前年份
+    default_year = all_years[0] if all_years else datetime.now().year
+    year = request.args.get('year', default_year)
     period_type = request.args.get('period_type', 'all')
     
     try:
         year = int(year)
     except ValueError:
-        year = datetime.now().year
+        year = default_year
     
-    # 查询收入和支出，并根据period_type过滤
-    if period_type == 'all':
-        incomes = Income.query.filter(db.extract('year', Income.date) == year).all()
-        expenses = Expense.query.filter(db.extract('year', Expense.date) == year).all()
-    else:
-        incomes = Income.query.filter(
-            db.extract('year', Income.date) == year,
-            Income.period_type == period_type
-        ).all()
-        expenses = Expense.query.filter(
-            db.extract('year', Expense.date) == year,
-            Expense.period_type == period_type
-        ).all()
+    # 查询收入和支出，并根据period_type过滤（兼容SQLite）
+    incomes = []
+    for income in Income.query.all():
+        match = False
+        if income.date.year == year:
+            if period_type == 'all' or income.period_type == period_type:
+                match = True
+        if match:
+            incomes.append(income)
+    expenses = []
+    for expense in Expense.query.all():
+        match = False
+        if expense.date.year == year:
+            if period_type == 'all' or expense.period_type == period_type:
+                match = True
+        if match:
+            expenses.append(expense)
     
     # 组织现金流量项目
     cash_flow_items = []
@@ -525,6 +573,104 @@ def data_list():
     
     return render_template('data_list.html', data_items=data_items, data_type=data_type)
 
+@main.route('/expense_analysis', methods=['GET'])
+def expense_analysis():
+    """支出分析页面"""
+    # 获取当前年份
+    current_year = datetime.now().year
+    
+    # 获取所有有支出记录的年份（兼容SQLite）
+    all_expense_years = set()
+    for expense in Expense.query.all():
+        all_expense_years.add(expense.date.year)
+    
+    # 计算最新有数据的年份
+    latest_year = max(all_expense_years) if all_expense_years else current_year
+    
+    # 默认年份为最新有数据的年份
+    year = request.args.get('year', latest_year)
+    
+    try:
+        year = int(year)
+    except ValueError:
+        year = latest_year
+    
+    # 查询所有支出记录
+    expenses = Expense.query.all()
+    # 按年份过滤
+    filtered_expenses = []
+    for expense in expenses:
+        if expense.date.year == year:
+            filtered_expenses.append(expense)
+    expenses = filtered_expenses
+    
+    # 聚合支出到三个主要类别
+    aggregated_expenses = {
+        'rent_mortgage': 0,  # 房租房贷
+        'repayments': 0,     # 还款（转账给他人、转账给自己）
+        'consumption': 0,    # 消费（其他所有）
+        'consumption_details': {}  # 消费分类明细
+    }
+    
+    # 定义分类规则
+    for expense in expenses:
+        category = expense.category.strip()  # 去除类别名称中的空格
+        amount = expense.amount
+        
+        if category in ['房租', '房贷','房租房贷']:
+            aggregated_expenses['rent_mortgage'] += amount
+        elif category in ['还款', '转账给他人', '转账给自己']:
+            aggregated_expenses['repayments'] += amount
+        else:
+            aggregated_expenses['consumption'] += amount
+            # 记录消费分类明细
+            if category not in aggregated_expenses['consumption_details']:
+                aggregated_expenses['consumption_details'][category] = 0
+            aggregated_expenses['consumption_details'][category] += amount
+    
+    # 准备消费分类饼图数据 - 使用三个主要聚合类别
+    pie_labels = ['房租房贷', '还款', '消费']
+    pie_values = [
+        aggregated_expenses['rent_mortgage'],
+        aggregated_expenses['repayments'],
+        aggregated_expenses['consumption']
+    ]
+    
+    pie_chart_data = {
+        'labels': pie_labels,
+        'values': pie_values
+    }
+    
+    # 准备年度消费变化曲线数据
+    # 准备年度消费变化曲线数据
+    # 获取所有有支出记录的年份（兼容SQLite），用于趋势图
+    trend_years_with_expenses = sorted(all_expense_years)  # 按升序排列
+    
+    # 下拉菜单的年份列表：只显示有数据的年份，降序
+    dropdown_years = sorted(all_expense_years, reverse=True) if all_expense_years else [current_year]
+    
+    annual_consumption = []
+    for y in trend_years_with_expenses:
+        # 查询该年份的支出记录（兼容SQLite）
+        year_expenses = []
+        for expense in Expense.query.all():
+            if expense.date.year == y:
+                year_expenses.append(expense)
+        total = sum(exp.amount for exp in year_expenses if exp.category not in ['房租', '房贷', '转账给他人', '转账给自己'])
+        annual_consumption.append(total)
+    
+    trend_chart_data = {
+        'years': trend_years_with_expenses,
+        'values': annual_consumption
+    }
+    
+    return render_template('expense_analysis.html',
+                           year=year,
+                           aggregated_expenses=aggregated_expenses,
+                           pie_chart_data=pie_chart_data,
+                           trend_chart_data=trend_chart_data,
+                           years_with_expenses=dropdown_years)
+
 @main.route('/edit_data', methods=['POST'])
 def edit_data():
     """编辑数据"""
@@ -711,11 +857,25 @@ def data_cleanup():
 @main.route('/financial_health', methods=['GET'])
 def financial_health():
     """财务健康分析"""
-    year = request.args.get('year', datetime.now().year)
+    # 获取所有有数据的年份（收入、支出、资产、负债）
+    all_years = set()
+    for income in Income.query.all():
+        all_years.add(income.date.year)
+    for expense in Expense.query.all():
+        all_years.add(expense.date.year)
+    for asset in Asset.query.all():
+        all_years.add(asset.update_date.year)
+    for liability in Liability.query.all():
+        all_years.add(liability.update_date.year)
+    all_years = sorted(list(all_years), reverse=True)
+    
+    # 默认年份为最新有数据的年份，若无数据则为当前年份
+    default_year = all_years[0] if all_years else datetime.now().year
+    year = request.args.get('year', default_year)
     try:
         year = int(year)
     except ValueError:
-        year = datetime.now().year
+        year = default_year
     
     # 计算财务指标
     metrics = {
@@ -889,7 +1049,17 @@ def dashboard():
     """仪表盘 - 财务概览与图表"""
     from datetime import datetime
     # 获取筛选参数
-    year = request.args.get('year', datetime.now().year)
+    # 获取所有有收入或支出数据的年份
+    all_years = set()
+    for income in Income.query.all():
+        all_years.add(income.date.year)
+    for expense in Expense.query.all():
+        all_years.add(expense.date.year)
+    all_years = sorted(list(all_years), reverse=True)
+    
+    # 默认年份为最新有数据的年份，若无数据则为当前年份
+    default_year = all_years[0] if all_years else datetime.now().year
+    year = request.args.get('year', default_year)
     year = int(year)
     
     month = request.args.get('month')

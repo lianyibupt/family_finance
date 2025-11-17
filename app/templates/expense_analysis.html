@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="unified-card">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">支出分析</h2>
+        
+        <!-- 年份筛选 -->
+        <form method="GET" action="{{ url_for('main.expense_analysis') }}" class="mb-6">
+            <div class="form-control">
+                <label for="year" class="label">年份：</label>
+                <select id="year" name="year" class="select select-bordered">
+                    {% for y in years_with_expenses %}
+                        <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-4">查询</button>
+        </form>
+        
+        <!-- 支出分类汇总 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="card-gradient-primary p-6 rounded-lg shadow-md">
+                <div class="card-content">
+                    <div class="text-sm text-white opacity-80">房租房贷</div>
+                    <div class="text-2xl font-bold text-white">¥{{ aggregated_expenses.rent_mortgage | round(2) }}</div>
+                </div>
+            </div>
+            <div class="card-gradient-error p-6 rounded-lg shadow-md">
+                <div class="card-content">
+                    <div class="text-sm text-white opacity-80">还款（转账给他人/自己）</div>
+                    <div class="text-2xl font-bold text-white">¥{{ aggregated_expenses.repayments | round(2) }}</div>
+                </div>
+            </div>
+            <div class="card-gradient-success p-6 rounded-lg shadow-md">
+                <div class="card-content">
+                    <div class="text-sm text-white opacity-80">消费（其他所有）</div>
+                    <div class="text-2xl font-bold text-white">¥{{ aggregated_expenses.consumption | round(2) }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 消费分类饼图 -->
+        <div class="chart-wrapper mb-16">
+            <div class="chart-container">
+                <canvas id="consumptionPieChart"></canvas>
+            </div>
+            <div class="chart-title">支出分类分布</div>
+        </div>
+        
+        <!-- 年度消费变化曲线 -->
+        <div class="chart-wrapper">
+            <div class="chart-container">
+                <canvas id="annualConsumptionChart"></canvas>
+            </div>
+            <div class="chart-title">年度消费变化趋势</div>
+        </div>
+        
+        <!-- 引入Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // 消费分类饼图
+                const pieCtx = document.getElementById('consumptionPieChart').getContext('2d');
+                const pieChartData = {{ pie_chart_data | tojson | safe }};
+                
+                if (pieChartData.labels.length > 0) {
+                    new Chart(pieCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: pieChartData.labels,
+                            datasets: [{
+                                data: pieChartData.values,
+                                backgroundColor: [
+                                    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+                                    '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 20,
+                                        color: '#2d3748'
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                    titleColor: '#1f2937',
+                                    bodyColor: '#4b5563',
+                                    borderColor: '#e5e7eb',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    borderRadius: 12,
+                                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.parsed || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = Math.round((value / total) * 100);
+                                            return `${label}: ¥${value.toFixed(2)} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // 年度消费变化曲线
+                const lineCtx = document.getElementById('annualConsumptionChart').getContext('2d');
+                const trendChartData = {{ trend_chart_data | tojson | safe }};
+                
+                if (trendChartData.years.length > 0) {
+                    new Chart(lineCtx, {
+                        type: 'line',
+                        data: {
+                            labels: trendChartData.years.map(year => year.toString()),
+                            datasets: [{
+                                label: '年度消费金额',
+                                data: trendChartData.values,
+                                borderColor: '#667eea',
+                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 5,
+                                pointBackgroundColor: '#667eea',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointHoverRadius: 7
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 20,
+                                        color: '#2d3748'
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                    titleColor: '#1f2937',
+                                    bodyColor: '#4b5563',
+                                    borderColor: '#e5e7eb',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    borderRadius: 12,
+                                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.dataset.label || '';
+                                            const value = context.parsed.y || 0;
+                                            return `${label}: ¥${value.toFixed(2)}`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    },
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '¥' + value;
+                                        }
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
+    </div>
+{% endblock %}

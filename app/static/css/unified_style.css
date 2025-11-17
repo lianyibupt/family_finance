@@ -58,6 +58,16 @@ body {
     color: white;
 }
 
+.card-gradient-error {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.card-gradient-success {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    color: white;
+}
+
 /* KPI组件 */
 .kpi-container {
     display: flex;
@@ -251,14 +261,15 @@ body {
     backdrop-filter: blur(10px);
     width: 100%;
     max-width: 100%;
-    margin-bottom: 24px;
     box-sizing: border-box;
+    margin-bottom: 2rem;
 }
 
 .chart-container {
     width: 100% !important;
     height: 500px !important;
     box-sizing: border-box;
+    margin-bottom: 1rem;
 }
 
 .chart-title {
