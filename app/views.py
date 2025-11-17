@@ -656,7 +656,7 @@ def expense_analysis():
         for expense in Expense.query.all():
             if expense.date.year == y:
                 year_expenses.append(expense)
-        total = sum(exp.amount for exp in year_expenses if exp.category not in ['房租', '房贷', '转账给他人', '转账给自己'])
+        total = sum(exp.amount for exp in year_expenses if exp.category not in ['房租', '房贷','房租房贷', '还款','转账给他人', '转账给自己'])
         annual_consumption.append(total)
     
     trend_chart_data = {
