@@ -551,8 +551,10 @@ def data_list():
     """详细数据列表页面"""
     from app.models import Income, Expense, Asset, Liability
     
-    # 获取数据类型
+    # 获取筛选参数
     data_type = request.args.get('data_type', 'all')
+    year_filter = request.args.get('year', 'all')
+    source_filter = request.args.get('source', 'all')
     
     # 根据数据类型查询数据
     if data_type == 'income':
@@ -571,7 +573,65 @@ def data_list():
         data_items.extend(Asset.query.all())
         data_items.extend(Liability.query.all())
     
-    return render_template('data_list.html', data_items=data_items, data_type=data_type)
+    # 计算可用的年份列表
+    available_years = set()
+    for item in data_items:
+        if hasattr(item, 'date'):
+            available_years.add(str(item.date.year))
+        elif hasattr(item, 'update_date'):
+            available_years.add(str(item.update_date.year))
+    available_years = sorted(list(available_years), reverse=True)
+    
+    # 计算可用的来源/支付人/所有者列表
+    available_sources = set()
+    for item in data_items:
+        if hasattr(item, 'source'):
+            available_sources.add(item.source)
+        elif hasattr(item, 'payer'):
+            available_sources.add(item.payer)
+        elif hasattr(item, 'owner'):
+            available_sources.add(item.owner)
+    available_sources = sorted(list(available_sources))
+    
+    # 应用年份筛选
+    if year_filter != 'all':
+        filtered_items = []
+        for item in data_items:
+            try:
+                if hasattr(item, 'date'):
+                    if str(item.date.year) == year_filter:
+                        filtered_items.append(item)
+                elif hasattr(item, 'update_date'):
+                    if str(item.update_date.year) == year_filter:
+                        filtered_items.append(item)
+            except:
+                continue
+        data_items = filtered_items
+    
+    # 应用来源/支付人/所有者筛选
+    if source_filter != 'all':
+        filtered_items = []
+        for item in data_items:
+            if hasattr(item, 'source'):
+                if item.source == source_filter:
+                    filtered_items.append(item)
+            elif hasattr(item, 'payer'):
+                if item.payer == source_filter:
+                    filtered_items.append(item)
+            elif hasattr(item, 'owner'):
+                if item.owner == source_filter:
+                    filtered_items.append(item)
+        data_items = filtered_items
+    
+    return render_template(
+        'data_list.html', 
+        data_items=data_items, 
+        data_type=data_type,
+        available_years=available_years,
+        selected_year=year_filter,
+        available_sources=available_sources,
+        selected_source=source_filter
+    )
 
 @main.route('/expense_analysis', methods=['GET'])
 def expense_analysis():
